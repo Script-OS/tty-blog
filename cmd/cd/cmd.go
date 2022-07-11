@@ -19,6 +19,9 @@ func Run(args []string) {
 		fmt.Fprintln(os.Stderr, "Usage of cd:\n  cd <dir>")
 		flagSet.PrintDefaults()
 	}
+	if len(args) == 0 {
+		args = append(args, "/")
+	}
 	err := flagSet.Parse(args)
 	if err == flag.ErrHelp {
 		return
@@ -26,7 +29,6 @@ func Run(args []string) {
 		fmt.Fprintln(os.Stderr, termenv.String(err.Error()).Foreground(termenv.ANSIRed))
 		return
 	}
-
 	if flagSet.NArg() != 1 {
 		fmt.Fprintln(os.Stderr, termenv.String("cd need one argument").Foreground(termenv.ANSIRed))
 		return
