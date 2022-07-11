@@ -4,7 +4,6 @@ go 1.18
 
 require (
 	github.com/chzyer/readline v1.5.0
-	github.com/muesli/reflow v0.3.0
 	github.com/muesli/termenv v0.12.0
 )
 

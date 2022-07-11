@@ -35,6 +35,13 @@ func main() {
 		} else if err != nil {
 			log.Panicln(err)
 		}
+
+		//act like real terminal
+		tmpLine := strings.TrimSpace(line)
+		if tmpLine == "\n" || tmpLine == "" {
+			continue
+		}
+
 		parts := strings.Split(line, " ")
 		for i, it := range parts {
 			parts[i] = strings.TrimSpace(it)
