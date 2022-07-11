@@ -13,6 +13,7 @@ import (
 	"tty-blog/cmd/edit"
 	"tty-blog/cmd/ls"
 	"tty-blog/cmd/su"
+	"tty-blog/cmd/view"
 	"tty-blog/global"
 )
 
@@ -23,6 +24,7 @@ func main() {
 	RegisterCommand(cd.Name, cd.Run)
 	RegisterCommand(su.Name, su.Run)
 	RegisterCommand(edit.Name, edit.Run)
+	RegisterCommand(view.Name, view.Run)
 
 	reader, err := readline.NewEx(&readline.Config{
 		AutoComplete: readline.NewPrefixCompleter(

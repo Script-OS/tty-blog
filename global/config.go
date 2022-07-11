@@ -9,6 +9,7 @@ import (
 
 type ConfigType struct {
 	Editor         *[]string `yaml:"editor"`
+	Viewer         *[]string `yaml:"viewer"`
 	EditorPassword *string   `yaml:"editorPassword"`
 }
 
@@ -17,6 +18,7 @@ var Config *ConfigType
 func defaultConfig() *ConfigType {
 	return &ConfigType{
 		Editor: &[]string{"nano", "-R"},
+		Viewer: &[]string{"less"},
 	}
 }
 
