@@ -49,10 +49,14 @@ func main() {
 		}
 
 		parts := strings.Split(line, " ")
-		for i, it := range parts {
-			parts[i] = strings.TrimSpace(it)
+		args := []string{}
+		for _, it := range parts {
+			part := strings.TrimSpace(it)
+			if part != "" {
+				args = append(args, part)
+			}
 		}
-		Dispatch(parts)
+		Dispatch(args)
 	}
 	return
 }
