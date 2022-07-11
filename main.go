@@ -10,7 +10,9 @@ import (
 	"path/filepath"
 	"strings"
 	"tty-blog/cmd/cd"
+	"tty-blog/cmd/edit"
 	"tty-blog/cmd/ls"
+	"tty-blog/cmd/su"
 	"tty-blog/global"
 )
 
@@ -19,11 +21,15 @@ func main() {
 
 	RegisterCommand(ls.Name, ls.Run)
 	RegisterCommand(cd.Name, cd.Run)
+	RegisterCommand(su.Name, su.Run)
+	RegisterCommand(edit.Name, edit.Run)
 
 	reader, err := readline.NewEx(&readline.Config{
 		AutoComplete: readline.NewPrefixCompleter(
 			ls.Completer,
 			cd.Completer,
+			su.Completer,
+			edit.Completer,
 		),
 	})
 	if err != nil {

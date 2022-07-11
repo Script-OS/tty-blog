@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/chzyer/readline v1.5.0
 	github.com/muesli/termenv v0.12.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
