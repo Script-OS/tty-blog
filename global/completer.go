@@ -3,24 +3,24 @@ package global
 import (
 	"github.com/chzyer/readline"
 	"io/fs"
+	"path/filepath"
 	"strings"
 )
 
 func complete(base string) []string {
 	ret := []string{}
-	if base == "" {
-		base = WorkDir
-	}
-	if base[len(base)-1] == '/' {
-		base = base[:len(base)-1]
-	}
-	prefix := base
-	if prefix == "." {
-		prefix = ""
+	dir := filepath.Dir(base)
+	if !filepath.IsAbs(dir) {
+		dir = filepath.Join(WorkDir, dir)
 	} else {
-		prefix += "/"
+		dir = filepath.Join(".", dir)
 	}
-	entries, _ := fs.ReadDir(Root, base)
+
+	parts := strings.Split(base, "/")
+	parts[len(parts)-1] = ""
+	prefix := strings.Join(parts, "/")
+
+	entries, _ := fs.ReadDir(Root, dir)
 	for _, entry := range entries {
 		name := entry.Name()
 		if name[0] == '.' {
