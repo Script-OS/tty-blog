@@ -27,11 +27,14 @@ func Run(args []string) {
 		return
 	}
 
-	if flagSet.NArg() != 1 {
-		fmt.Fprintln(os.Stderr, termenv.String("cd need one argument").Foreground(termenv.ANSIRed))
+	if flagSet.NArg() > 1 {
+		fmt.Fprintln(os.Stderr, termenv.String("cd need at most one argument").Foreground(termenv.ANSIRed))
 		return
 	}
-	dir := global.CalcPath(filepath.Clean(flagSet.Arg(0)))
+	dir := global.WorkDir
+	if flagSet.NArg() == 1 {
+		dir = global.CalcPath(filepath.Clean(flagSet.Arg(0)))
+	}
 
 	stat, err := fs.Stat(global.Root, dir)
 	if err != nil {

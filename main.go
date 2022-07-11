@@ -13,6 +13,7 @@ import (
 	"tty-blog/cmd/edit"
 	"tty-blog/cmd/ls"
 	"tty-blog/cmd/su"
+	"tty-blog/cmd/view"
 	"tty-blog/global"
 )
 
@@ -22,6 +23,7 @@ func main() {
 	RegisterCommand(ls.Name, ls.Run)
 	RegisterCommand(cd.Name, cd.Run)
 	RegisterCommand(su.Name, su.Run)
+	RegisterCommand(view.Name, view.Run)
 	RegisterCommand(edit.Name, edit.Run)
 
 	reader, err := readline.NewEx(&readline.Config{
@@ -29,6 +31,7 @@ func main() {
 			ls.Completer,
 			cd.Completer,
 			su.Completer,
+			view.Completer,
 			edit.Completer,
 		),
 	})
