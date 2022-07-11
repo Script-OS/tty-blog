@@ -23,6 +23,7 @@ func main() {
 	RegisterCommand(ls.Name, ls.Run)
 	RegisterCommand(cd.Name, cd.Run)
 	RegisterCommand(su.Name, su.Run)
+	RegisterCommand(view.Name, view.Run)
 	RegisterCommand(edit.Name, edit.Run)
 	RegisterCommand(view.Name, view.Run)
 
@@ -31,6 +32,7 @@ func main() {
 			ls.Completer,
 			cd.Completer,
 			su.Completer,
+			view.Completer,
 			edit.Completer,
 		),
 	})
