@@ -25,16 +25,11 @@ func Run(args []string) {
 		fmt.Fprintln(os.Stderr, termenv.String("ls need at most one argument").Foreground(termenv.ANSIRed))
 		return
 	}
-	dir := global.WorkDir
+	dir := "."
 	if flagSet.NArg() == 1 {
 		dir = flagSet.Arg(0)
 	}
-	dir = filepath.Clean(dir)
-	if !filepath.IsAbs(dir) {
-		dir = filepath.Join(global.WorkDir, dir)
-	} else {
-		dir = filepath.Join(".", dir)
-	}
+	dir = global.CalcPath(filepath.Clean(dir))
 
 	entries, err := fs.ReadDir(global.Root, dir)
 	if err != nil {

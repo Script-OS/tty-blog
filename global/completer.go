@@ -9,12 +9,7 @@ import (
 
 func complete(base string) []string {
 	ret := []string{}
-	dir := filepath.Dir(base)
-	if !filepath.IsAbs(dir) {
-		dir = filepath.Join(WorkDir, dir)
-	} else {
-		dir = filepath.Join(".", dir)
-	}
+	dir := CalcPath(filepath.Dir(base))
 
 	parts := strings.Split(base, "/")
 	parts[len(parts)-1] = ""

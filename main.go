@@ -7,7 +7,9 @@ import (
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
+	"tty-blog/cmd/cd"
 	"tty-blog/cmd/ls"
 	"tty-blog/global"
 )
@@ -16,10 +18,12 @@ func main() {
 	global.Root = os.DirFS(".")
 
 	RegisterCommand(ls.Name, ls.Run)
+	RegisterCommand(cd.Name, cd.Run)
 
 	reader, err := readline.NewEx(&readline.Config{
 		AutoComplete: readline.NewPrefixCompleter(
 			ls.Completer,
+			cd.Completer,
 		),
 	})
 	if err != nil {
@@ -27,8 +31,10 @@ func main() {
 	}
 
 	usernameStyle := termenv.Style{}.Bold().Foreground(termenv.ANSIGreen)
+	pathStyle := termenv.Style{}.Bold().Foreground(termenv.ANSIBlue)
 	for {
-		reader.SetPrompt(usernameStyle.Styled(fmt.Sprintf("%s@%s> ", global.User, "blog")))
+		fakePath := filepath.Clean("/" + global.WorkDir)
+		reader.SetPrompt(usernameStyle.Styled(fmt.Sprintf("%s@%s", global.User, "blog")) + ":" + pathStyle.Styled(fakePath) + "> ")
 		line, err := reader.Readline()
 		if err == io.EOF {
 			os.Exit(0)
