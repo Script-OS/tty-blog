@@ -15,8 +15,14 @@ const Name = "cd"
 
 func Run(args []string) {
 	flagSet := flag.NewFlagSet(Name, flag.ContinueOnError)
+	flagSet.Usage = func() {
+		fmt.Fprintln(os.Stderr, "Usage of cd:\n  cd <dir>")
+		flagSet.PrintDefaults()
+	}
 	err := flagSet.Parse(args)
-	if err != nil {
+	if err == flag.ErrHelp {
+		return
+	} else if err != nil {
 		fmt.Fprintln(os.Stderr, termenv.String(err.Error()).Foreground(termenv.ANSIRed))
 		return
 	}
