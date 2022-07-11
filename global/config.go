@@ -16,7 +16,7 @@ var Config *ConfigType
 
 func defaultConfig() *ConfigType {
 	return &ConfigType{
-		Editor: &[]string{"nano", "-t"},
+		Editor: &[]string{"nano", "-R"},
 	}
 }
 
