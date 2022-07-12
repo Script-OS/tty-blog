@@ -3,12 +3,13 @@ package view
 import (
 	"flag"
 	"fmt"
-	"github.com/charmbracelet/glamour"
 	"github.com/chzyer/readline"
 	"github.com/muesli/termenv"
+	"golang.org/x/term"
 	"io/fs"
 	"os"
 	"path/filepath"
+	"tty-blog/cmd/view/renderer"
 	"tty-blog/global"
 )
 
@@ -54,9 +55,11 @@ func Run(args []string) {
 		return
 	}
 
-	renderer, _ := glamour.NewTermRenderer(glamour.WithStylePath("dark"))
-	rendered, _ := renderer.Render(string(raw))
-	RenderInPage(rendered)
+	w, _, _ := term.GetSize(int(os.Stdin.Fd()))
+	r := renderer.New(w)
+	rendered, _ := renderer.EasyRender(r, raw)
+	os.WriteFile("debug2.txt", rendered, 0777)
+	RenderInPage(string(rendered))
 }
 
 var Completer = readline.PcItem(Name, global.NewPathCompleter())

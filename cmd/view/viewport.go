@@ -47,9 +47,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 	case tea.WindowSizeMsg:
-		headerHeight := lipgloss.Height(m.headerView())
-		footerHeight := lipgloss.Height(m.footerView())
-		verticalMarginHeight := headerHeight + footerHeight
+		//headerHeight := lipgloss.Height(m.headerView())
+		//footerHeight := lipgloss.Height(m.footerView())
+		verticalMarginHeight := 0 //headerHeight + footerHeight
 
 		if !m.ready {
 			// Since this program is using the full size of the viewport we
@@ -58,7 +58,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// quickly, though asynchronously, which is why we wait for them
 			// here.
 			m.viewport = viewport.New(msg.Width, msg.Height-verticalMarginHeight)
-			m.viewport.YPosition = headerHeight
+			m.viewport.YPosition = 0 //headerHeight
 			m.viewport.HighPerformanceRendering = useHighPerformanceRenderer
 			m.viewport.SetContent(m.content)
 			m.ready = true
@@ -67,7 +67,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// most cases you won't need.
 			//
 			// Render the viewport one line below the header.
-			m.viewport.YPosition = headerHeight + 1
+			m.viewport.YPosition = 1 //headerHeight + 1
 		} else {
 			m.viewport.Width = msg.Width
 			m.viewport.Height = msg.Height - verticalMarginHeight
@@ -96,19 +96,19 @@ func (m model) View() string {
 	return m.viewport.View()
 }
 
-func (m model) headerView() string {
-	//title := titleStyle.Render("Mr. Pager")
-	//line := strings.Repeat("─", max(0, m.viewport.Width-lipgloss.Width(title)))
-	//return lipgloss.JoinHorizontal(lipgloss.Center, title, line)
-	return ""
-}
+//func (m model) headerView() string {
+//	//title := titleStyle.Render("Mr. Pager")
+//	//line := strings.Repeat("─", max(0, m.viewport.Width-lipgloss.Width(title)))
+//	//return lipgloss.JoinHorizontal(lipgloss.Center, title, line)
+//	return ""
+//}
 
-func (m model) footerView() string {
-	//info := infoStyle.Render(fmt.Sprintf("%3.f%%", m.viewport.ScrollPercent()*100))
-	//line := strings.Repeat("─", max(0, m.viewport.Width-lipgloss.Width(info)))
-	//return lipgloss.JoinHorizontal(lipgloss.Center, line, info)
-	return ""
-}
+//func (m model) footerView() string {
+//	//info := infoStyle.Render(fmt.Sprintf("%3.f%%", m.viewport.ScrollPercent()*100))
+//	//line := strings.Repeat("─", max(0, m.viewport.Width-lipgloss.Width(info)))
+//	//return lipgloss.JoinHorizontal(lipgloss.Center, line, info)
+//	return ""
+//}
 
 func max(a, b int) int {
 	if a > b {
@@ -119,8 +119,8 @@ func max(a, b int) int {
 func RenderInPage(content string) {
 	p := tea.NewProgram(
 		model{content: content},
-		tea.WithAltScreen(),       // use the full size of the terminal in its "alternate screen buffer"
-		tea.WithMouseCellMotion(), // turn on mouse support, so we can track the mouse wheel
+		tea.WithAltScreen(),      // use the full size of the terminal in its "alternate screen buffer"
+		tea.WithMouseAllMotion(), // turn on mouse support, so we can track the mouse wheel
 	)
 
 	if err := p.Start(); err != nil {
