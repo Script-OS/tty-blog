@@ -13,7 +13,7 @@ type Action struct {
 	Style    *style.Style
 }
 
-type BlockEnterType func(ctx *RenderContext, node ast.Node) BlockDecorator
+type BlockEnterType func(ctx *RenderContext, node ast.Node, source []byte) BlockDecorator
 type BlockRenderType func(ctx *RenderContext, node ast.Node, width int, content string, actions []Action, source []byte) string
 type InlineEnterType func(ctx *RenderContext, node ast.Node) (*style.Style, string)
 type InlineRenderType func(ctx *RenderContext, node ast.Node, source []byte) string
@@ -53,21 +53,21 @@ func DefaultBlockRender(ctx *RenderContext, node ast.Node, width int, content st
 	thin := ctx.Deco[len(ctx.Deco)-1].Thin()
 	decoLines := []string{}
 
-	head := ctx.Deco[len(ctx.Deco)-1].Push()
-	if head != "" {
-		lines := strings.Split(head, "\n")
-		for lineIndex, line := range lines {
-			rendered := line + strings.Repeat(" ", realWidth+ctx.Deco[len(ctx.Deco)-1].Width()-ansi.PrintableRuneWidth(line))
-			length := len(ctx.Deco) - 1
-			for i, _ := range ctx.Deco {
-				if i == 0 {
-					continue
-				}
-				rendered = ctx.Deco[length-i].Deco(rendered, lineIndex, len(lines))
-			}
-			decoLines = append(decoLines, rendered)
-		}
-	}
+	//head := ctx.Deco[len(ctx.Deco)-1].Push()
+	//if head != "" {
+	//	lines := strings.Split(head, "\n")
+	//	for lineIndex, line := range lines {
+	//		rendered := line + strings.Repeat(" ", realWidth+ctx.Deco[len(ctx.Deco)-1].Width()-ansi.PrintableRuneWidth(line))
+	//		length := len(ctx.Deco) - 1
+	//		for i, _ := range ctx.Deco {
+	//			if i == 0 {
+	//				continue
+	//			}
+	//			rendered = ctx.Deco[length-i].Deco(rendered, lineIndex, len(lines))
+	//		}
+	//		decoLines = append(decoLines, rendered)
+	//	}
+	//}
 
 	//
 	lines := strings.Split(Wrap(content, realWidth), "\n")

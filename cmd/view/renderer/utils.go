@@ -48,7 +48,7 @@ func initMarkdownStyle(renderer *TermRenderer) {
 	}
 	// heading
 	renderer.BlockProc[ast.KindHeading] = BlockItem{
-		Enter: func(ctx *RenderContext, node ast.Node) BlockDecorator {
+		Enter: func(ctx *RenderContext, node ast.Node, source []byte) BlockDecorator {
 			level := node.(*ast.Heading).Level
 			if level == 1 {
 				return &common.BlockDecorator{
@@ -77,7 +77,7 @@ func initMarkdownStyle(renderer *TermRenderer) {
 	}
 	// block-quote
 	renderer.BlockProc[ast.KindBlockquote] = BlockItem{
-		Enter: func(ctx *RenderContext, node ast.Node) BlockDecorator {
+		Enter: func(ctx *RenderContext, node ast.Node, source []byte) BlockDecorator {
 			return &common.BlockDecorator{
 				Prefix: func(lineNo int, lineNum int) string { return "│ " },
 			}
@@ -85,7 +85,7 @@ func initMarkdownStyle(renderer *TermRenderer) {
 	}
 	// list
 	renderer.BlockProc[ast.KindList] = BlockItem{
-		Enter: func(ctx *RenderContext, node ast.Node) BlockDecorator {
+		Enter: func(ctx *RenderContext, node ast.Node, source []byte) BlockDecorator {
 			return &common.BlockDecorator{
 				Prefix:     func(lineNo int, lineNum int) string { return "  " },
 				LineSuffix: " ",
@@ -94,7 +94,7 @@ func initMarkdownStyle(renderer *TermRenderer) {
 	}
 	// list-item
 	renderer.BlockProc[ast.KindListItem] = BlockItem{
-		Enter: func(ctx *RenderContext, node ast.Node) BlockDecorator {
+		Enter: func(ctx *RenderContext, node ast.Node, source []byte) BlockDecorator {
 			return &common.BlockDecorator{
 				Prefix: oncePrefix("• ", "  "),
 			}
@@ -102,7 +102,7 @@ func initMarkdownStyle(renderer *TermRenderer) {
 	}
 	// fenced-code-block
 	renderer.BlockProc[ast.KindFencedCodeBlock] = BlockItem{
-		Enter: func(ctx *RenderContext, node ast.Node) BlockDecorator {
+		Enter: func(ctx *RenderContext, node ast.Node, source []byte) BlockDecorator {
 			return &common.BlockDecorator{
 				Prefix: func(lineNo int, lineNum int) string { return termenv.Style{}.Foreground(termenv.ANSIWhite).Styled("") },
 				Suffix: func(lineNo int, lineNum int) string { return termenv.Style{}.Foreground(termenv.ANSIWhite).Styled("") },
@@ -121,6 +121,25 @@ func initMarkdownStyle(renderer *TermRenderer) {
 			quick.Highlight(buf, code, lang, "terminal256", "monokai")
 			return DefaultBlockRender(ctx, node, width, buf.String(), action, source)
 		},
+	}
+	// table
+	renderer.BlockProc[astext.KindTable] = BlockItem{
+		Enter:  EnterTable,
+		Render: RenderTable,
+	}
+	// heading
+	renderer.BlockProc[astext.KindTableHeader] = BlockItem{
+		Enter:  EnterRow,
+		Render: RenderHeading,
+	}
+	// row
+	renderer.BlockProc[astext.KindTableRow] = BlockItem{
+		Enter:  EnterRow,
+		Render: RenderRow,
+	}
+	// cell
+	renderer.BlockProc[astext.KindTableCell] = BlockItem{
+		Render: RenderCell,
 	}
 
 	// text

@@ -58,7 +58,7 @@ func Run(args []string) {
 	w, _, _ := term.GetSize(int(os.Stdin.Fd()))
 	r := renderer.New(w)
 	rendered, _ := renderer.EasyRender(r, raw)
-	os.WriteFile("debug2.txt", rendered, 0777)
+	//os.WriteFile("debug2.txt", rendered, 0777)
 	RenderInPage(string(rendered))
 }
 
