@@ -2,7 +2,9 @@ package style
 
 import (
 	"github.com/lucasb-eyer/go-colorful"
+	"github.com/muesli/ansi"
 	"github.com/muesli/termenv"
+	"tty-blog/cmd/view/renderer/webmedia"
 )
 
 const (
@@ -13,6 +15,8 @@ const (
 	CrossOut              // bool
 	Underline             // bool
 	Overline              // bool
+	Link                  // string
+	Media                 // *webmedia.MediaDesc
 	MAX
 )
 
@@ -63,6 +67,22 @@ func merge(styles []Style) Style {
 }
 
 func Render(styles []Style, text string) string {
-	style := toTerm(merge(styles))
-	return style.Styled(text)
+	merged := merge(styles)
+	style := toTerm(merged)
+	rendered := style.Styled(text)
+	if meta, ok := merged[Link]; ok {
+		link := meta.(string)
+		if webmedia.InWebmediaTerm {
+			rendered = webmedia.SetWebmediaLink(link, ansi.PrintableRuneWidth(text)) + rendered
+		} else {
+			rendered = webmedia.SetOSC8Link(link) + rendered + webmedia.SetOSC8Link("")
+		}
+	}
+	if meta, ok := merged[Media]; ok {
+		desc := meta.(*webmedia.MediaDesc)
+		if webmedia.InWebmediaTerm {
+			rendered += webmedia.SetWebmediaMedia(desc)
+		}
+	}
+	return rendered
 }

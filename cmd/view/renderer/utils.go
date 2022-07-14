@@ -15,6 +15,7 @@ import (
 	"strings"
 	"tty-blog/cmd/view/renderer/common"
 	"tty-blog/cmd/view/renderer/style"
+	"tty-blog/cmd/view/renderer/webmedia"
 )
 
 func easyHex(s string) colorful.Color {
@@ -35,6 +36,8 @@ func oncePrefix(special string, common string) func(lineNo int, lineNum int) str
 		}
 	}
 }
+
+const MediaLines = 20
 
 func initMarkdownStyle(renderer *TermRenderer) {
 	firstHeadingStyle := style.Style{
@@ -144,14 +147,14 @@ func initMarkdownStyle(renderer *TermRenderer) {
 
 	// text
 	renderer.InlineProc[ast.KindText] = InlineItem{
-		Render: func(ctx *RenderContext, node ast.Node, source []byte) string {
+		Render: func(ctx *RenderContext, node ast.Node, source []byte) (string, string) {
 			//return string(node.Text(source))
-			return strings.Replace(string(node.Text(source)), "\n", " ", -1)
+			return strings.Replace(string(node.Text(source)), "\n", " ", -1), ""
 		},
 	}
 	// emphasis
 	renderer.InlineProc[ast.KindEmphasis] = InlineItem{
-		Enter: func(ctx *RenderContext, node ast.Node) (*style.Style, string) {
+		Enter: func(ctx *RenderContext, node ast.Node, source []byte) (*style.Style, string) {
 			level := node.(*ast.Emphasis).Level
 			if level == 1 {
 				return &style.Style{
@@ -166,38 +169,59 @@ func initMarkdownStyle(renderer *TermRenderer) {
 	}
 	// code-span
 	renderer.InlineProc[ast.KindCodeSpan] = InlineItem{
-		Enter: func(ctx *RenderContext, node ast.Node) (*style.Style, string) {
+		Enter: func(ctx *RenderContext, node ast.Node, source []byte) (*style.Style, string) {
 			return &style.Style{
 				style.Foreground: easyHex("#ff5f5f"),
 				style.Background: easyHex("#303030"),
 			}, " "
 		},
-		Render: func(ctx *RenderContext, node ast.Node, source []byte) string {
-			return " "
+		Render: func(ctx *RenderContext, node ast.Node, source []byte) (string, string) {
+			return " ", ""
 		},
 	}
 	// task-check-box
 	renderer.InlineProc[astext.KindTaskCheckBox] = InlineItem{
-		Render: func(ctx *RenderContext, node ast.Node, source []byte) string {
+		Render: func(ctx *RenderContext, node ast.Node, source []byte) (string, string) {
 			if node.(*astext.TaskCheckBox).IsChecked {
-				return "[✓] "
+				return "[✓] ", ""
 			} else {
-				return "[ ] "
+				return "[ ] ", ""
 			}
 		},
 	}
 	// link
 	renderer.InlineProc[ast.KindLink] = InlineItem{
-		Render: func(ctx *RenderContext, node ast.Node, source []byte) string {
+		Enter: func(ctx *RenderContext, node ast.Node, source []byte) (*style.Style, string) {
 			href := string(node.(*ast.Link).Destination)
-			return " →  " + href
+			return &style.Style{
+				style.Link: href,
+			}, ""
 		},
 	}
 	// media
 	renderer.InlineProc[ast.KindImage] = InlineItem{
-		Render: func(ctx *RenderContext, node ast.Node, source []byte) string {
+		Enter: func(ctx *RenderContext, node ast.Node, source []byte) (*style.Style, string) {
 			href := string(node.(*ast.Image).Destination)
-			return " →  " + href
+			if webmedia.InWebmediaTerm {
+				text := string(node.Text(source))
+				if node.FirstChild() != nil {
+					node.RemoveChild(node, node.FirstChild())
+				}
+				return &style.Style{style.Media: &webmedia.MediaDesc{
+					Text:  text,
+					Lines: MediaLines - 1,
+					Url:   href,
+				}}, " "
+			} else {
+				return &style.Style{style.Link: href}, ""
+			}
+		},
+		Render: func(ctx *RenderContext, node ast.Node, source []byte) (string, string) {
+			if webmedia.InWebmediaTerm {
+				return "", strings.Repeat("\n", MediaLines)
+			} else {
+				return "", ""
+			}
 		},
 	}
 }

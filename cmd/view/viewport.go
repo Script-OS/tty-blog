@@ -6,6 +6,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"os"
+	"tty-blog/cmd/view/renderer/webmedia"
 )
 
 const useHighPerformanceRenderer = false
@@ -47,17 +48,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 	case tea.WindowSizeMsg:
-		//headerHeight := lipgloss.Height(m.headerView())
-		//footerHeight := lipgloss.Height(m.footerView())
-		verticalMarginHeight := 0 //headerHeight + footerHeight
-
 		if !m.ready {
 			// Since this program is using the full size of the viewport we
 			// need to wait until we've received the window dimensions before
 			// we can initialize the viewport. The initial dimensions come in
 			// quickly, though asynchronously, which is why we wait for them
 			// here.
-			m.viewport = viewport.New(msg.Width, msg.Height-verticalMarginHeight)
+			m.viewport = viewport.New(msg.Width, msg.Height)
 			m.viewport.YPosition = 0 //headerHeight
 			m.viewport.HighPerformanceRendering = useHighPerformanceRenderer
 			m.viewport.SetContent(m.content)
@@ -70,7 +67,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.viewport.YPosition = 1 //headerHeight + 1
 		} else {
 			m.viewport.Width = msg.Width
-			m.viewport.Height = msg.Height - verticalMarginHeight
+			m.viewport.Height = msg.Height
 		}
 
 		if useHighPerformanceRenderer {
@@ -93,29 +90,10 @@ func (m model) View() string {
 	if !m.ready {
 		return "\n  Initializing..."
 	}
-	return m.viewport.View()
+	//fmt.Print(webmedia.ResetWebmediaLinks())
+	return webmedia.ResetWebmedia() + m.viewport.View()
 }
 
-//func (m model) headerView() string {
-//	//title := titleStyle.Render("Mr. Pager")
-//	//line := strings.Repeat("─", max(0, m.viewport.Width-lipgloss.Width(title)))
-//	//return lipgloss.JoinHorizontal(lipgloss.Center, title, line)
-//	return ""
-//}
-
-//func (m model) footerView() string {
-//	//info := infoStyle.Render(fmt.Sprintf("%3.f%%", m.viewport.ScrollPercent()*100))
-//	//line := strings.Repeat("─", max(0, m.viewport.Width-lipgloss.Width(info)))
-//	//return lipgloss.JoinHorizontal(lipgloss.Center, line, info)
-//	return ""
-//}
-
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
 func RenderInPage(content string) {
 	p := tea.NewProgram(
 		model{content: content},

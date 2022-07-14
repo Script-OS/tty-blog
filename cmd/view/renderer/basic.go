@@ -15,8 +15,8 @@ type Action struct {
 
 type BlockEnterType func(ctx *RenderContext, node ast.Node, source []byte) BlockDecorator
 type BlockRenderType func(ctx *RenderContext, node ast.Node, width int, content string, actions []Action, source []byte) string
-type InlineEnterType func(ctx *RenderContext, node ast.Node) (*style.Style, string)
-type InlineRenderType func(ctx *RenderContext, node ast.Node, source []byte) string
+type InlineEnterType func(ctx *RenderContext, node ast.Node, source []byte) (*style.Style, string)
+type InlineRenderType func(ctx *RenderContext, node ast.Node, source []byte) (string, string)
 
 type BlockItem struct {
 	Enter  BlockEnterType

@@ -130,7 +130,7 @@ func (r *TermRenderer) render(w util.BufWriter, source []byte, node ast.Node, en
 				action := &style.Style{}
 				s := ""
 				if proc, ok := r.InlineProc[node.Kind()]; ok && proc.Enter != nil {
-					action, s = proc.Enter(r.ctx, node)
+					action, s = proc.Enter(r.ctx, node, source)
 				}
 				r.ctx.actions = append(r.ctx.actions, Action{
 					Position: r.ctx.width,
@@ -159,8 +159,9 @@ func (r *TermRenderer) render(w util.BufWriter, source []byte, node ast.Node, en
 				r.ctx.actions = []Action{}
 			} else if node.Type() == ast.TypeInline {
 				line := ""
+				suffix := ""
 				if proc, ok := r.InlineProc[node.Kind()]; ok && proc.Render != nil {
-					line = proc.Render(r.ctx, node, source)
+					line, suffix = proc.Render(r.ctx, node, source)
 				}
 				r.ctx.width += len([]rune(line))
 				r.ctx.localLine += line
@@ -168,6 +169,8 @@ func (r *TermRenderer) render(w util.BufWriter, source []byte, node ast.Node, en
 					Position: r.ctx.width,
 					Style:    nil,
 				})
+				r.ctx.width += len([]rune(suffix))
+				r.ctx.localLine += suffix
 			} else if node.Type() == ast.TypeDocument {
 				r.ctx.Reset()
 			}

@@ -59,7 +59,10 @@ func Run(args []string) {
 	r := renderer.New(w)
 	rendered, _ := renderer.EasyRender(r, raw)
 	//os.WriteFile("debug2.txt", rendered, 0777)
-	RenderInPage(string(rendered))
+	fmt.Print("\x1b[?1000h")
+	fmt.Print(string(rendered))
+	//RenderInPage(string(rendered))
+	fmt.Print("\x1b[?1000l")
 }
 
 var Completer = readline.PcItem(Name, global.NewPathCompleter())

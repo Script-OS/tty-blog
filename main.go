@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/chzyer/readline"
+	"github.com/mattn/go-runewidth"
 	"github.com/muesli/termenv"
 	"io"
 	"log"
@@ -18,6 +19,9 @@ import (
 )
 
 func main() {
+	runewidth.EastAsianWidth = false
+	runewidth.DefaultCondition.EastAsianWidth = false
+
 	global.Root = os.DirFS(".")
 
 	RegisterCommand(ls.Name, ls.Run)
@@ -46,7 +50,7 @@ func main() {
 		fakePath := filepath.Clean("/" + global.WorkDir)
 		reader.SetPrompt(usernameStyle.Styled(fmt.Sprintf("%s@%s", global.User, "blog")) + ":" + pathStyle.Styled(fakePath) + "> ")
 		line, err := reader.Readline()
-		if err == io.EOF {
+		if err == io.EOF || err == readline.ErrInterrupt {
 			os.Exit(0)
 		} else if err != nil {
 			log.Panicln(err)
