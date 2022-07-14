@@ -9,6 +9,7 @@ import (
 var InWebmediaTerm = false
 
 type MediaDesc struct {
+	Id    int
 	Text  string
 	Lines int
 	Url   string
@@ -44,9 +45,14 @@ func SetWebmediaLink(link string, textLen int) string {
 func SetWebmediaMedia(desc *MediaDesc) string {
 	params := []string{
 		"media",
+		strconv.FormatInt(int64(desc.Id), 10),
 		base64.StdEncoding.EncodeToString([]byte(desc.Text)),
 		strconv.FormatInt(int64(desc.Lines), 10),
 		desc.Url,
 	}
 	return makeOSCSeq(9999, strings.Join(params, ";"))
+}
+
+func CleanWebmediaMedia() string {
+	return makeOSCSeq(9999, "cleanMedia")
 }

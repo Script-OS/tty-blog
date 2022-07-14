@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"tty-blog/cmd/view/renderer"
+	"tty-blog/cmd/view/renderer/webmedia"
 	"tty-blog/global"
 )
 
@@ -60,9 +61,10 @@ func Run(args []string) {
 	rendered, _ := renderer.EasyRender(r, raw)
 	//os.WriteFile("debug2.txt", rendered, 0777)
 	fmt.Print("\x1b[?1000h")
-	fmt.Print(string(rendered))
-	//RenderInPage(string(rendered))
+	//fmt.Print(string(rendered))
+	RenderInPage(string(rendered))
 	fmt.Print("\x1b[?1000l")
+	fmt.Print(webmedia.CleanWebmediaMedia())
 }
 
 var Completer = readline.PcItem(Name, global.NewPathCompleter())

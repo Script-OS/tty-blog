@@ -2,107 +2,188 @@ package view
 
 import (
 	"fmt"
-	"github.com/charmbracelet/bubbles/viewport"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
+	"github.com/muesli/termenv"
+	"golang.org/x/term"
 	"os"
+	"strings"
+	"tty-blog/cmd/view/renderer/input"
 	"tty-blog/cmd/view/renderer/webmedia"
 )
 
-const useHighPerformanceRenderer = false
-
-var (
-	titleStyle = func() lipgloss.Style {
-		b := lipgloss.RoundedBorder()
-		b.Right = "├"
-		return lipgloss.NewStyle().BorderStyle(b).Padding(0, 1)
-	}()
-
-	infoStyle = func() lipgloss.Style {
-		b := lipgloss.RoundedBorder()
-		b.Left = "┤"
-		return titleStyle.Copy().BorderStyle(b)
-	}()
-)
-
 type model struct {
-	content  string
-	ready    bool
-	viewport viewport.Model
+	ready           bool
+	lines           []string
+	y               int
+	width           int
+	height          int
+	MouseWheelDelta int
 }
 
-func (m model) Init() tea.Cmd {
-	return nil
-}
-
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var (
-		cmd  tea.Cmd
-		cmds []tea.Cmd
-	)
+func (m *model) Update(msg input.Msg) bool {
 
 	switch msg := msg.(type) {
-	case tea.KeyMsg:
+	case input.KeyMsg:
 		if k := msg.String(); k == "ctrl+c" || k == "q" || k == "esc" {
-			return m, tea.Quit
+			return false
+		}
+		if m.ready {
+			switch msg.String() {
+			case "pgdown":
+				m.ViewDown()
+
+			case "pgup":
+				m.ViewUp()
+
+			case "down":
+				m.LineDown(1)
+
+			case "up":
+				m.LineUp(1)
+			}
 		}
 
-	case tea.WindowSizeMsg:
-		if !m.ready {
-			// Since this program is using the full size of the viewport we
-			// need to wait until we've received the window dimensions before
-			// we can initialize the viewport. The initial dimensions come in
-			// quickly, though asynchronously, which is why we wait for them
-			// here.
-			m.viewport = viewport.New(msg.Width, msg.Height)
-			m.viewport.YPosition = 0 //headerHeight
-			m.viewport.HighPerformanceRendering = useHighPerformanceRenderer
-			m.viewport.SetContent(m.content)
-			m.ready = true
+	case input.MouseMsg:
+		if m.ready {
+			switch msg.Type {
+			case input.MouseWheelUp:
+				m.LineUp(m.MouseWheelDelta)
 
-			// This is only necessary for high performance rendering, which in
-			// most cases you won't need.
-			//
-			// Render the viewport one line below the header.
-			m.viewport.YPosition = 1 //headerHeight + 1
-		} else {
-			m.viewport.Width = msg.Width
-			m.viewport.Height = msg.Height
-		}
-
-		if useHighPerformanceRenderer {
-			// Render (or re-render) the whole viewport. Necessary both to
-			// initialize the viewport and when the window is resized.
-			//
-			// This is needed for high-performance rendering only.
-			cmds = append(cmds, viewport.Sync(m.viewport))
+			case input.MouseWheelDown:
+				m.LineDown(m.MouseWheelDelta)
+			}
 		}
 	}
 
-	// Handle keyboard and mouse events in the viewport
-	m.viewport, cmd = m.viewport.Update(msg)
-	cmds = append(cmds, cmd)
-
-	return m, tea.Batch(cmds...)
+	return true
 }
 
-func (m model) View() string {
-	if !m.ready {
-		return "\n  Initializing..."
+func (m *model) AtTop() bool {
+	return m.y <= 0
+}
+
+func (m *model) AtBottom() bool {
+	return m.y >= m.maxY()
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
 	}
-	//fmt.Print(webmedia.ResetWebmediaLinks())
-	return webmedia.ResetWebmedia() + m.viewport.View()
+	return b
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func (m *model) maxY() int {
+	return max(0, len(m.lines)-m.height)
+}
+
+func (m *model) SetY(n int) {
+	m.y = min(m.maxY(), max(0, n))
+}
+
+func (m *model) ViewDown() {
+	if m.AtBottom() {
+		return
+	}
+	m.SetY(m.y + m.height)
+}
+
+func (m *model) ViewUp() {
+	if m.AtTop() {
+		return
+	}
+	m.SetY(m.y - m.height)
+}
+
+func (m *model) LineDown(n int) {
+	if m.AtBottom() || n == 0 {
+		return
+	}
+	m.SetY(m.y + n)
+}
+
+func (m *model) LineUp(n int) {
+	if m.AtTop() || n == 0 {
+		return
+	}
+	m.SetY(m.y - n)
+}
+
+func (m model) visibleLines() (lines []string) {
+	if len(m.lines) > 0 {
+		top := max(0, m.y)
+		bottom := min(len(m.lines), max(top, m.y+m.height))
+		lines = m.lines[top:bottom]
+	}
+	return lines
+}
+
+func (m model) View() {
+	if !m.ready {
+		return
+	}
+
+	fmt.Print(webmedia.ResetWebmedia())
+	lines := m.visibleLines()
+	for i, line := range lines {
+		termenv.MoveCursor(i, 0)
+		fmt.Print(line)
+	}
+	for i := len(lines); i < m.height; i += 1 {
+		termenv.MoveCursor(i, 0)
+		fmt.Print(strings.Repeat(" ", m.width))
+	}
+
+	return
 }
 
 func RenderInPage(content string) {
-	p := tea.NewProgram(
-		model{content: content},
-		tea.WithAltScreen(),      // use the full size of the terminal in its "alternate screen buffer"
-		tea.WithMouseAllMotion(), // turn on mouse support, so we can track the mouse wheel
-	)
-
-	if err := p.Start(); err != nil {
-		fmt.Println("could not run program:", err)
-		os.Exit(1)
+	m := model{
+		lines:           strings.Split(content, "\n"),
+		y:               0,
+		MouseWheelDelta: 3,
 	}
+
+	oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
+	if err != nil {
+		return
+	}
+	defer term.Restore(int(os.Stdin.Fd()), oldState)
+
+	termenv.AltScreen()
+	termenv.HideCursor()
+
+	w, h, _ := term.GetSize(int(os.Stdin.Fd()))
+	m.width = w
+	m.height = h
+	m.ready = true
+
+	m.View()
+
+	quit := false
+	for !quit {
+		msgs, err := input.ReadInputs(os.Stdin)
+		if err != nil {
+			break
+		}
+		if len(msgs) == 0 {
+			continue
+		}
+		for _, msg := range msgs {
+			if !m.Update(msg) {
+				quit = true
+			}
+		}
+
+		m.View()
+	}
+
+	termenv.ShowCursor()
+	termenv.ExitAltScreen()
 }

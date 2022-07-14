@@ -199,6 +199,7 @@ func initMarkdownStyle(renderer *TermRenderer) {
 		},
 	}
 	// media
+	id := 0
 	renderer.InlineProc[ast.KindImage] = InlineItem{
 		Enter: func(ctx *RenderContext, node ast.Node, source []byte) (*style.Style, string) {
 			href := string(node.(*ast.Image).Destination)
@@ -207,7 +208,10 @@ func initMarkdownStyle(renderer *TermRenderer) {
 				if node.FirstChild() != nil {
 					node.RemoveChild(node, node.FirstChild())
 				}
+				thisId := id
+				id += 1
 				return &style.Style{style.Media: &webmedia.MediaDesc{
+					Id:    thisId,
 					Text:  text,
 					Lines: MediaLines - 1,
 					Url:   href,
