@@ -22,7 +22,8 @@ func main() {
 	runewidth.EastAsianWidth = false
 	runewidth.DefaultCondition.EastAsianWidth = false
 
-	global.Root = os.DirFS(".")
+	global.RealDir = *global.Config.RootDir
+	global.Root = os.DirFS(global.RealDir)
 
 	RegisterCommand(ls.Name, ls.Run)
 	RegisterCommand(cd.Name, cd.Run)

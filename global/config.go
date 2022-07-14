@@ -10,13 +10,16 @@ import (
 type ConfigType struct {
 	Editor         *[]string `yaml:"editor"`
 	EditorPassword *string   `yaml:"editorPassword"`
+	RootDir        *string   `yaml:"rootDir"`
 }
 
 var Config *ConfigType
 
 func defaultConfig() *ConfigType {
+	rootDir := "."
 	return &ConfigType{
-		Editor: &[]string{"nano", "-R"},
+		Editor:  &[]string{"nano", "-R"},
+		RootDir: &rootDir,
 	}
 }
 
@@ -44,6 +47,9 @@ func mergeConfig(configs ...*ConfigType) *ConfigType {
 		}
 		if ret.EditorPassword == nil {
 			ret.EditorPassword = conf.EditorPassword
+		}
+		if ret.RootDir == nil {
+			ret.RootDir = conf.RootDir
 		}
 	}
 	return ret
