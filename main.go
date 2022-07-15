@@ -65,6 +65,7 @@ func main() {
 	usernameStyle := termenv.Style{}.Bold().Foreground(termenv.ANSIGreen)
 	pathStyle := termenv.Style{}.Bold().Foreground(termenv.ANSIBlue)
 	for {
+		termenv.SetWindowTitle("TTY-BLOG")
 		fakePath := filepath.Clean("/" + global.WorkDir)
 		reader.SetPrompt(usernameStyle.Styled(fmt.Sprintf("%s@%s", global.User, "blog")) + ":" + pathStyle.Styled(fakePath) + "> ")
 		line, err := reader.Readline()

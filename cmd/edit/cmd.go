@@ -37,6 +37,8 @@ func Run(args []string) {
 	}
 	dir := global.CalcPath(filepath.Clean(flagSet.Arg(0)))
 
+	termenv.SetWindowTitle("edit: " + filepath.Base(dir))
+
 	editorArgs := append([]string{}, (*global.Config.Editor)[1:]...)
 	editorArgs = append(editorArgs, filepath.Join(global.RealDir, dir))
 	cmd := exec.Command((*global.Config.Editor)[0], editorArgs...)

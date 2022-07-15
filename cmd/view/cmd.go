@@ -56,6 +56,8 @@ func Run(args []string) {
 		return
 	}
 
+	termenv.SetWindowTitle(filepath.Base(file))
+
 	w, _, _ := term.GetSize(int(os.Stdin.Fd()))
 	r := renderer.New(w)
 	rendered, _ := renderer.EasyRender(r, raw)
