@@ -18,6 +18,15 @@ import (
 	"tty-blog/global"
 )
 
+const banner = "" +
+	"████████╗████████╗██╗   ██╗     ██████╗ ██╗      ██████╗  ██████╗ \n" +
+	"╚══██╔══╝╚══██╔══╝╚██╗ ██╔╝     ██╔══██╗██║     ██╔═══██╗██╔════╝ \n" +
+	"   ██║      ██║    ╚████╔╝█████╗██████╔╝██║     ██║   ██║██║  ███╗\n" +
+	"   ██║      ██║     ╚██╔╝ ╚════╝██╔══██╗██║     ██║   ██║██║   ██║\n" +
+	"   ██║      ██║      ██║        ██████╔╝███████╗╚██████╔╝╚██████╔╝\n" +
+	"   ╚═╝      ╚═╝      ╚═╝        ╚═════╝ ╚══════╝ ╚═════╝  ╚═════╝ \n" +
+	"                                                                  \n"
+
 func main() {
 	runewidth.EastAsianWidth = false
 	runewidth.DefaultCondition.EastAsianWidth = false
@@ -30,7 +39,10 @@ func main() {
 	RegisterCommand(su.Name, su.Run)
 	RegisterCommand(view.Name, view.Run)
 	RegisterCommand(edit.Name, edit.Run)
-	RegisterCommand(view.Name, view.Run)
+	RegisterCommand("help", HelpCmd)
+	RegisterCommand("?", func(args []string) {
+		fmt.Println("Usable commands:", strings.Join([]string{ls.Name, cd.Name, su.Name, view.Name, edit.Name, "help"}, " "))
+	})
 
 	reader, err := readline.NewEx(&readline.Config{
 		AutoComplete: readline.NewPrefixCompleter(
@@ -39,11 +51,16 @@ func main() {
 			su.Completer,
 			view.Completer,
 			edit.Completer,
+			HelpCompleter(ls.Name, cd.Name, su.Name, view.Name, edit.Name, "help"),
+			readline.PcItem("?"),
 		),
 	})
 	if err != nil {
 		log.Panicln(err)
 	}
+
+	bannerStyle := termenv.Style{}.Foreground(termenv.ANSICyan)
+	fmt.Print(bannerStyle.Styled(banner))
 
 	usernameStyle := termenv.Style{}.Bold().Foreground(termenv.ANSIGreen)
 	pathStyle := termenv.Style{}.Bold().Foreground(termenv.ANSIBlue)
