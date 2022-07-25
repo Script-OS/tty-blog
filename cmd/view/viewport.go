@@ -80,7 +80,7 @@ func max(a, b int) int {
 }
 
 func (m *model) maxY() int {
-	return max(0, len(m.lines)-m.height)
+	return max(0, len(m.lines)-m.height-1)
 }
 
 func (m *model) SetY(n int) {
@@ -132,11 +132,11 @@ func (m model) View() {
 	fmt.Print(webmedia.ResetWebmedia())
 	lines := m.visibleLines()
 	for i, line := range lines {
-		termenv.MoveCursor(i, 0)
+		termenv.MoveCursor(i+1, 0)
 		fmt.Print(line)
 	}
 	for i := len(lines); i < m.height; i += 1 {
-		termenv.MoveCursor(i, 0)
+		termenv.MoveCursor(i+1, 0)
 		fmt.Print(strings.Repeat(" ", m.width))
 	}
 
