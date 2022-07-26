@@ -2,6 +2,8 @@ module tty-blog
 
 go 1.18
 
+replace github.com/chzyer/readline v1.5.0 => github.com/azurity/readline v1.5.2-0.20220726074959-bc5e96926eb6
+
 require (
 	github.com/alecthomas/chroma v0.10.0
 	github.com/chzyer/readline v1.5.0
