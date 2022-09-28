@@ -8,10 +8,28 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"sort"
 	"tty-blog/global"
 )
 
 const Name = "ls"
+
+const timeLayout = "2006-01-02 15:04:05"
+
+type EntrySorter []fs.DirEntry
+
+func (a EntrySorter) Len() int      { return len(a) }
+func (a EntrySorter) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a EntrySorter) Less(i, j int) bool {
+	if a[i].IsDir() != a[j].IsDir() {
+		return a[i].IsDir()
+	}
+	infoI, _ := a[i].Info()
+	infoJ, _ := a[j].Info()
+	timeI := infoI.ModTime()
+	timeJ := infoJ.ModTime()
+	return timeI.After(timeJ) || (timeI.Equal(timeJ) && a[i].Name() < a[j].Name())
+}
 
 func Run(args []string) {
 	flagSet := flag.NewFlagSet(Name, flag.ContinueOnError)
@@ -44,15 +62,19 @@ func Run(args []string) {
 	}
 	fileStyle := termenv.Style{}
 	dirStyle := termenv.Style{}.Foreground(termenv.ANSIBlue)
+	sort.Sort(EntrySorter(entries))
+	fmt.Println(" TIME               │ NAME ")
+	fmt.Println("────────────────────┼──────")
 	for _, entry := range entries {
 		name := entry.Name()
 		if name[0] == '.' {
 			continue
 		}
+		info, _ := entry.Info()
 		if entry.IsDir() {
-			fmt.Println(dirStyle.Styled(name))
+			fmt.Println(info.ModTime().Format(timeLayout), "│", dirStyle.Styled(name))
 		} else {
-			fmt.Println(fileStyle.Styled(name))
+			fmt.Println(info.ModTime().Format(timeLayout), "│", fileStyle.Styled(name))
 		}
 	}
 }

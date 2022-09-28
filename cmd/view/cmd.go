@@ -19,7 +19,7 @@ const Name = "view"
 func Run(args []string) {
 	flagSet := flag.NewFlagSet(Name, flag.ContinueOnError)
 	flagSet.Usage = func() {
-		fmt.Fprintln(os.Stderr, "Usage of view:\n  cd <file>")
+		fmt.Fprintln(os.Stderr, "Usage of view:\n  view <file>")
 		flagSet.PrintDefaults()
 	}
 	err := flagSet.Parse(args)
