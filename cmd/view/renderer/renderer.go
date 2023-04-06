@@ -81,6 +81,7 @@ func (r *TermRenderer) RegisterFuncs(reg renderer.NodeRendererFuncRegisterer) {
 	reg.Register(ast.KindEmphasis, r.render)
 	reg.Register(ast.KindImage, r.render)
 	reg.Register(ast.KindLink, r.render)
+	reg.Register(ast.KindAutoLink, r.render)
 	reg.Register(ast.KindRawHTML, r.render)
 	reg.Register(ast.KindText, r.render)
 	reg.Register(ast.KindString, r.render)

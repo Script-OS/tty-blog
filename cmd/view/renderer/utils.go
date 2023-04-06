@@ -198,6 +198,15 @@ func initMarkdownStyle(renderer *TermRenderer) {
 			}, ""
 		},
 	}
+	// autolink
+	renderer.InlineProc[ast.KindAutoLink] = InlineItem{
+		Enter: func(ctx *RenderContext, node ast.Node, source []byte) (*style.Style, string) {
+			href := string(node.(*ast.AutoLink).URL(source))
+			return &style.Style{
+				style.Link: href,
+			}, href
+		},
+	}
 	// media
 	id := 0
 	renderer.InlineProc[ast.KindImage] = InlineItem{
