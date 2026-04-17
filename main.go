@@ -91,5 +91,4 @@ func main() {
 		}
 		Dispatch(args)
 	}
-	return
 }

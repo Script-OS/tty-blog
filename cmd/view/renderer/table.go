@@ -108,7 +108,10 @@ func RenderCell(ctx *RenderContext, node ast.Node, width int, content string, ac
 		}
 	}
 
-	rendered += style.Render(styles, strings.Repeat(" ", ctx.Meta["table"].([]int)[ctx.Meta["col"].(int)]-ansi.PrintableRuneWidth(rendered)))
+	paddingWidth := ctx.Meta["table"].([]int)[ctx.Meta["col"].(int)] - ansi.PrintableRuneWidth(rendered)
+	if paddingWidth > 0 {
+		rendered += style.Render(styles, strings.Repeat(" ", paddingWidth))
+	}
 
 	prefix := ""
 	if ctx.Meta["col"].(int) != 0 {
